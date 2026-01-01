@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [filter , setFilter]= useState('')
+  const [Message, setMessage] = useState(null)
+  const [Type, setType] = useState(null)
 
   useEffect(() => {
     personService
@@ -35,6 +38,14 @@ const App = () => {
         setPersons(prev => prev.concat(returnedPerson))
         setNewName('')
         setNewPhone('')
+        setMessage(
+          `Added ${personObject.name}`
+        )
+        setType("success")
+        setTimeout(() => {
+          setMessage(null)
+          setType(null)
+        }, 5000)
       })
     }
     
@@ -53,6 +64,16 @@ const App = () => {
     if (window.confirm(`Delete ${person.name} ?`)) {
       personService.remove(id).then(() => {
       setPersons(prev => prev.filter(p => p.id !== id))
+  }).catch(error => {
+    setType("error")
+    setMessage(
+          `Information of ${person.name} has already been removed from server`
+        )
+    setPersons(prev => prev.filter(p => p.id !== id))      
+    setTimeout(() => {
+      setMessage(null)
+      setType(null)
+    }, 5000)
   })
   }}
   
@@ -62,6 +83,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={Message} type={Type}/>
       <Filter value={filter} onChange={handleNoteChange3} />
       <h2>add a new</h2>
       <Form submit={addPerson} value1={newName} value2={newPhone} onChange1={handleNoteChange1} onChange2={handleNoteChange2}/>
